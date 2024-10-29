@@ -1,23 +1,37 @@
 import { Schema, Document, model, ObjectId } from 'mongoose';
 
 interface IUser extends Document {
-  first: string;
-  last: string;
-  age: number;
-  videos: ObjectId[];
-  fullName: string;
- }
+  username: string;
+  email: string;
+  thoughts: ObjectId[];
+  friends: ObjectId[];
+  friendCount?: number;}
 
 // Schema to create User model
 const userSchema = new Schema<IUser>(
   {
-    first: String,
-    last: String,
-    age: Number,
-    videos: [
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      match: [/.+@.+\..+/, 'Please enter a valid e-mail address'],
+    },
+    thoughts: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'video',
+        ref: 'thought',
+      },
+    ],
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'user',
       },
     ],
   },
@@ -33,10 +47,10 @@ const userSchema = new Schema<IUser>(
 
 // Create a virtual property `fullName` that gets and sets the user's full name
 userSchema
-  .virtual('fullName')
+  .virtual('friendCount')
   // Getter
-  .get(function (this: any) {
-    return `${this.first} ${this.last}`;
+  .get(function (this: IUser) {
+    return this.friends.length;
   })
   // Setter to set the first and last name
   .set(function (this: any, v: any) {
