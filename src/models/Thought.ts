@@ -1,35 +1,39 @@
 import { Schema, model } from 'mongoose';
-import Response from './Response.js';
+import User from './User.js';
 
-interface IVideo {
-  published: boolean;
+interface IThought {
+  thoughtText: string;
   createdAt: Date;
-  advertiserFriendly: boolean;
-  description: string;
-  responses: Response[];
+  username: string;
+  reactions: [];
 }
 
-// Schema to create Post model
-const videoSchema = new Schema<IVideo>(
+// Schema to create thought model
+const thoughtSchema = new Schema<IThought>
+(
   {
-    published: {
-      type: Boolean,
-      default: false,
+    thoughtText: {
+      type: String,
+      required: true,
+      min: 1,
+      max: 280,
     },
     createdAt: {
       type: Date,
       default: Date.now,
     },
-    advertiserFriendly: {
-      type: Boolean,
-      default: true,
-    },
-    description: {
+    username: {
       type: String,
-      minLength: 8,
-      maxLength: 500,
+      required: true,
     },
-    responses: [Response],
+    // reactions should be an array of nested documents created with the reaction Schema
+    // the reaction schema is a schema only and not a model. it can be found in the models folder
+    reactions: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'reaction',
+      },
+    ],
   },
   {
     toJSON: {
@@ -39,15 +43,11 @@ const videoSchema = new Schema<IVideo>(
   }
 );
 
-// Create a virtual property `responses` that gets the amount of response per video
-videoSchema
-  .virtual('getResponses')
-  // Getter
-  .get(function () {
-    return this.responses.length;
-  });
+// write a virtual called reactionCount that retrieves the length of the thought's reactions array field on query.
+thoughtSchema.virtual('reactionCount').get(function (this: any) {
+  return this.reactions.length;
+});
+// create the Thought model using the thoughtSchema
+const Thought = model('Thought', thoughtSchema);
 
-// Initialize our Video model
-const Video = model('video', videoSchema);
-
-export default Video;
+export default Thought;

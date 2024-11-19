@@ -1,11 +1,11 @@
-import { Video, User } from '../models/index.js';
+import { Thought, User } from '../models/index.js';
 import { Request, Response } from 'express';
 
 
-  export const getVideos = async (_req: Request, res: Response) => {
+  export const getUsers = async (_req: Request, res: Response) => {
     try {
-      const videos = await Video.find();
-      res.json(videos);
+      const users = await User.find();
+      res.json(users);
     } catch (err) {
       res.status(500).json(err);
     }
